@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-tempo
+  namespace: otel-demo
+  labels:
+    grafana_datasource: "1"
+data:
+  tempo.yaml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        url: http://tempo-tempo1-query-frontend.tracing:3200
+        editable: true
+        isDefault: false
+        jsonData:
+          grpcAddress: tempo-tempo1-query-frontend.tracing:9095
+          tracesToLogsV2:
+            datasourceUid: webstore-logs
+            spanStartTimeShift: "-20m"
+            spanEndTimeShift: "20m"
+            filterByTraceID: true
+            filterBySpanID: true
+          tracesToMetrics:
+            datasourceUid: webstore-metrics
+          serviceMap:
+            datasourceUid: webstore-metrics
+          nodeGraph:
+            enabled: true
