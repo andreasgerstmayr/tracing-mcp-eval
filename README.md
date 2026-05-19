@@ -6,7 +6,9 @@ make forward
 ```
 
 # Access services
+```
 kubectl --namespace otel-demo port-forward svc/frontend-proxy 8080:8080
+```
 
 * Web store:             http://localhost:8080/
 * Grafana:               http://localhost:8080/grafana/

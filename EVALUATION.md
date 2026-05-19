@@ -217,3 +217,26 @@ Follow-up: "The sources are in the src folder"
 
   To fix it: Set the paymentFailure feature flag to 0 in your flagd configuration. That will stop the injected failures entirely.
 ```
+
+## Summary of Findings
+
+### What works well
+* **Service name lookups**: Searching traces by `resource.service.name` works correctly out of the box.
+* **Pod name lookups**: The model discovered `k8s.pod.name` via `tempo_search_tags` and constructed the correct query.
+* **Error trace and filtering**: Queries using `status=error` and `span.http.route` work as expected.
+* **Dependency mapping**: The model correctly identified upstream and downstream dependencies from a single trace.
+* **Trace comparison**: Detailed side-by-side comparison with root cause analysis was accurate and thorough.
+* **Root cause explanation**: When pointed to the source code, the model correctly identified the feature flag as the root cause.
+* **Multi-instance support**: The model queries both Tempo instances simultaneously.
+
+### Issues found
+* **Deployment lookups require a follow-up prompt**: The model defaults to `resource.service.name` instead of `resource.k8s.deployment.name` when asked about a deployment.
+* **Arbitrary latency thresholds**: When asked for "slow" or "outlier" traces, the model uses a hardcoded 500ms threshold without first establishing a baseline.
+* **Traces not checked for health assessments**: When asked about the state of a service, the model only checks alerts and metrics, missing a 90% error rate visible in traces. A follow-up prompt is needed to include traces.
+* **MCP server instructions truncated**: Instructions are cut off, and therfore instructions of the traces toolset are ignored.
+
+### Suggested improvements to obs-mcp
+1. Mention `resource.k8s.deployment.name` and `resource.k8s.pod.name` attributes in toolset instructions or tool descriptions.
+2. Add instructions to establish a latency baseline (e.g. query recent traces or RED metrics) before filtering for slow/outlier traces.
+3. Add instructions to check traces (especially error traces) when assessing service health, not just alerts and metrics.
+4. Fix the MCP server instructions truncation issue.
